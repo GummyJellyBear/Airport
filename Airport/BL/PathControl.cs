@@ -59,11 +59,11 @@ namespace Airport.BL
             Console.WriteLine(">>>>-----New-----Plane-----Enter-------->>>>");
             await AirRadiusStepIn(airplaneID);
             await AirPathAsync(airplaneID);//1
-            Land(airplaneID);//2
+            await LandAsync(airplaneID);//2
             await ToTermianlPathAsync(airplaneID);//3
             await TermianlPathAsync(airplaneID);//4
             await FromTermianlPathAsync(airplaneID);//5
-            TakeOffAsync(airplaneID);//6
+            await TakeOffAsync(airplaneID);//6
             Console.WriteLine("<<<<<---" + airplaneID + "---Exited---Airport---Area---<<<<");
         }
         public async Task DoEmergency(StationType stationType, int stationNumber, int SOSSeconds)
