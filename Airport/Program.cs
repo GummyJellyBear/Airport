@@ -1,4 +1,5 @@
 using Airport.BL;
+using Airport.Hubs;
 using Airport.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +11,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IAirplaneService,AirplaneService>();
-builder.Services.AddSingleton<IControlTower, ControlTower>();
-builder.Services.AddSingleton<IControlLanding, ControlLanding>();
+builder.Services.AddTransient<ITimerService, TimerService>();
+builder.Services.AddSingleton<ITowerControl, TowerControl>();
+builder.Services.AddSingleton<IPathControl, PathControl>();
+builder.Services.AddSingleton<IAirControl, AirControl>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -27,5 +31,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<MyHub>("/myHub");
 
 app.Run();

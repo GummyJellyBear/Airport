@@ -3,6 +3,6 @@
     public class Airplane
     {
         public int Id { get; set; }
-        public int SecondsToArrive { get; set; }
+        public int? SecondsToArrive { get; set; }
     }
 }

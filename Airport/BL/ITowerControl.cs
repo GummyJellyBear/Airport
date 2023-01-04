@@ -1,10 +1,10 @@
 ﻿namespace Airport.BL
 {
-    public interface IControlTower
+    public interface ITowerControl
     {
+        void InitiazAirMovment();
         void InitiazlizePlanes();
         void InitiazlizeStations();
-        Task LandToTakeoff(int airplaneID);
         void StartSimulator();
     }
 }

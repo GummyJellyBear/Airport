@@ -10,21 +10,26 @@ namespace Airport.Controllers
     public class LandingController : ControllerBase
     {
         private readonly IAirplaneService _airplaneService;
-        private readonly IControlTower _controlTower;
+        private readonly ITowerControl _controlTower;
 
         public LandingController(
             IAirplaneService airplaneService,
-            IControlTower controlTower)
+            ITowerControl controlTower)
         {
             _airplaneService = airplaneService;
             _controlTower = controlTower;
         }
-        [HttpPost]
+        [HttpGet]
         public async Task Start()
         {
             _controlTower.InitiazlizeStations();
             _controlTower.InitiazlizePlanes();
+            _controlTower.InitiazAirMovment();
             _controlTower.StartSimulator();
+        }
+        public async Task DoEmergency()
+        {
+
         }
     }
 }
