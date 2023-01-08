@@ -1,6 +1,9 @@
-﻿using Airport.Models;
+﻿using Airport.BL.BLIntefeces;
+using Airport.Hubs;
+using Airport.Models;
 using Airport.Models.Enum;
 using Airport.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Airport.BL
 {
@@ -9,40 +12,52 @@ namespace Airport.BL
         private readonly IAirplaneService _airplaneService;
         private readonly IPathControl _pathControl;
         private readonly ITimerService _backgroundTimer;
+        private readonly ITimerService _backgroundRender;
         private readonly IAirControl _airControl;
+        private readonly IHubContext<MyHub> _hub;
+
         public TowerControl(
             IAirplaneService airplaneService,
             IPathControl pathControl,
             ITimerService background,
-            IAirControl airControl)
+            ITimerService backgroundRender,
+            IAirControl airControl,
+            IHubContext<MyHub> hub)
         {
             _airplaneService = airplaneService;
             _pathControl = pathControl;
             _backgroundTimer = background;
+            _backgroundRender = backgroundRender;
             _airControl = airControl;
+            _hub = hub;
         }
-        public void InitiazlizeStations() => _pathControl.InitiazlizeStations();
-        public void InitiazAirMovment() => _airControl.FlyTimer(_pathControl.PlanesOnPath);
-        public void InitiazlizePlanes() => _airControl.PlanesToLand = _airplaneService.GetPlanes().ToList();
         public void StartSimulator()
         {
+            InitiazlizeStations();
+            InitiazAirMovment();
+            InitiazlizePlanes();
             var listOnPath = _pathControl.PlanesOnPath;
-            _backgroundTimer.Start(() =>
+            _airplaneService.SortAirplanes(listOnPath, (plane) =>
+                _pathControl.LandToTakeoff(plane));
+        }
+        public void RenderAirplanes()
+        {
+            _backgroundRender.Start(async () =>
             {
-                if (listOnPath.Count != 0)
+                foreach (var station in _airplaneService.Stations)
                 {
-                    var plane = listOnPath[0];
-                    listOnPath.RemoveAt(0);
-                    Thread thread = new Thread(new ThreadStart(() =>
-                    {
-                        _pathControl.LandToTakeoff(plane.Id);
-                    }));
-                    thread.Start();
+                    var s = new StationModel() { AirplaneInIt = station.AirplaneInIt, StationID = station.StationID };
+                    //await _hub.Clients.All.SendAsync("onAirplaneJoin",
+                    //    station.AirplaneInIt, station.StationID);
+                    await _hub.Clients.All.SendAsync("onAirplaneJoin", s);
                 }
             });
         }
-        public void DoEmergency(StationType stationType, int stationNumber, int SOSSeconds) => 
-            _pathControl.DoEmergency(stationType, stationNumber, SOSSeconds);
+        public void DoEmergency(int stationNumber, int SOSSeconds) =>
+            _pathControl.DoEmergency(stationNumber, SOSSeconds);
+        void InitiazlizeStations() => _pathControl.InitiazlizeStations(_hub);
+        void InitiazAirMovment() => _airControl.FlyTimer(_pathControl.PlanesOnPath);
+        void InitiazlizePlanes() => _airControl.PlanesToLand = _airplaneService.Airplanes;
     }
 }
 

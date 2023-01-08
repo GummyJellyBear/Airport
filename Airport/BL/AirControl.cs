@@ -1,4 +1,5 @@
-﻿using Airport.Models;
+﻿using Airport.BL.BLIntefeces;
+using Airport.Models;
 using Airport.Services;
 
 namespace Airport.BL
@@ -7,13 +8,13 @@ namespace Airport.BL
     {
         private readonly ITimerService _timer;
         public AirControl(ITimerService timer) => _timer = timer;
-        public List<Airplane> PlanesToLand { get; set; }
-            = new List<Airplane>();
-        public async Task FlyTimer(List<Airplane> landingPlanes)
+        public List<AirplaneModel> PlanesToLand { get; set; }
+            = new List<AirplaneModel>();
+        public async Task FlyTimer(List<AirplaneModel> landingPlanes)
         {
             await _timer.Start(async () =>
             {
-                foreach (Airplane airplane in PlanesToLand.ToList())
+                foreach (AirplaneModel airplane in PlanesToLand.ToList())
                 {
                     airplane.SecondsToArrive--;
                     if (airplane.SecondsToArrive <= 0)

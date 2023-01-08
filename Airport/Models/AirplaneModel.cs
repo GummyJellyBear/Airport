@@ -1,8 +1,9 @@
 ﻿namespace Airport.Models
 {
-    public class Airplane
+    public class AirplaneModel
     {
         public int Id { get; set; }
         public int? SecondsToArrive { get; set; }
+        public bool IsCrashed { get; set; }
     }
 }

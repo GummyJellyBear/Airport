@@ -4,7 +4,7 @@ namespace Airport.Data
 {
     public class DataService
     {
-        List<Station> Stations { get; set; }
-        List<Airplane> Airplanes { get; set; }
+        List<StationModel> Stations { get; set; }
+        List<AirplaneModel> Airplanes { get; set; }
     }
 }
