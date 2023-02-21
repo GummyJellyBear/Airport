@@ -8,9 +8,11 @@ namespace Airport.BL.BLIntefeces
     public interface IPathControl
     {
         List<AirplaneModel> PlanesOnPath { get; }
-
         void InitiazlizeStations(IHubContext<MyHub> context);
         Task LandToTakeoff(AirplaneModel ap);
-        Task DoEmergency(int stationNumber, int SOSSeconds);
+        public Task DoEmergency(int stationNumber, int SOSSeconds);
+        public void DoRain(int time);
+        public Task Land(AirplaneModel ap);
+        public Task Takeoff(AirplaneModel ap);
     }
 }

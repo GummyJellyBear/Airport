@@ -12,7 +12,7 @@ namespace Airport.BL
             = new List<AirplaneModel>();
         public async Task FlyTimer(List<AirplaneModel> landingPlanes)
         {
-            await _timer.Start(async () =>
+            await _timer.Start(() =>
             {
                 foreach (AirplaneModel airplane in PlanesToLand.ToList())
                 {

@@ -9,15 +9,15 @@ namespace Airport.BL.StationControl
         {
             gate = new SemaphoreSlim(capacity);
         }
-        public async override Task Join(AirplaneModel ap, int time = 5)
+        public async override Task Join(AirplaneModel ap)
         {
+            await gate.WaitAsync();
             var st = Stations.FirstOrDefault(a => a.AirplaneInIt == null);
             if(st == null)
-                await Stations[0].Join(ap, time);
+                await Stations[0].Join(ap);
             else
-                await Stations[st.StationID].Join(ap, time);
-            
-
+                await Stations[st.Index].Join(ap);
+            gate.Release();
         }
     }
 }

@@ -19,39 +19,16 @@ namespace Airport.Controllers
 
         public AirportController(ITowerControl towerControl) => _towerControl = towerControl;
 
-        // GET: api/<TestingAirportController>
-        [HttpGet]
-        public void StartSimulator()
-        {
-            _towerControl.StartSimulator();
-            //_hub.Clients.All.SendAsync("testing", "hello");
-            
-        }
+        [HttpGet("/start")]
+        public void StartSimulator() => _towerControl.StartSimulator();
 
-        // GET api/<TestingAirportController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+        [HttpGet("/emergency/{id}")]
+        public void Get(int id) => _towerControl.DoEmergency(id, 15);
 
-        // POST api/<TestingAirportController>
-        [HttpPost]
+        [HttpGet("/rain")]
         public void Post()
         {
            
-        }
-
-        // PUT api/<TestingAirportController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<TestingAirportController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

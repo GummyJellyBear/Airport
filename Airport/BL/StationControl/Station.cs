@@ -9,56 +9,61 @@ namespace Airport.BL.StationControl
 {
     public class Station : StationModel, IStation
     {
-
-        private readonly SemaphoreSlim gate = new SemaphoreSlim(1);
-        private readonly SemaphoreSlim emergencyGate = new SemaphoreSlim(1);
-        private readonly HubServiceTask hubServiceTask = new HubServiceTask();
-
-
-        private static readonly ITimerService _timerService = new TimerService();
-        private static readonly IAirplaneService _airplaneService = new AirplaneService(_timerService);
-
-
+        private readonly SemaphoreSlim gate;
+        private readonly SemaphoreSlim emergencyGate;
+        public Station()
+        {
+            gate = new SemaphoreSlim(1);
+            emergencyGate = new SemaphoreSlim(1);
+        }
+        public Station(int capacity)
+        {
+            gate = new SemaphoreSlim(capacity);
+            emergencyGate = new SemaphoreSlim(capacity);
+        }
         public IHubContext<MyHub>? HubContext { get; set; }
+        public int speedPrecent { get; set; } = 300;
+        public int Index { get; set; } = 0;
 
         public async Task Damage(int delaySeconds = 1, int totalTimeSeconds = 10)
         {
             AirplaneInIt = null;
             Thread.Sleep(delaySeconds * 1000);
             await emergencyGate.WaitAsync();
+            Console.WriteLine("station : " + StationID + " is in emergencyy");
             Thread.Sleep(totalTimeSeconds * 1000);
+            Console.WriteLine("station : " + StationID + " is OK!!!!!!");
+
             emergencyGate.Release();
         }
-        public async Task Join(AirplaneModel ap, int time = 5)
+        public async Task Join(AirplaneModel ap, int seconds = 5)
         {
-            await Entery(ap);
-            Console.WriteLine(ap.Id + " entered station number " + StationID);
-            Console.WriteLine(" ...Checking crush...");
-            //if (CheckCrush(ap))
-            //    return; // change later to remove both airplanes from list
-            //await hub.SendAirplaneAndStation(ap, StationID);
-            //_airplaneService.SendStation(this);
-            //await hub.Clients.All.SendAsync("onAirplaneJoin", new StationModel { AirplaneInIt = ap, StationID = this.StationID });
-            //await hub.SendAirplaneAndStation(new StationModel { AirplaneInIt = ap, StationID = this.StationID });
-            await SendStationToClient(ap);
-
-            Thread.Sleep(time * 1000);
-            Exit();
-            Console.WriteLine(ap.Id + " Exited station number " + StationID);
+            await Entery(ap, seconds);
+            await Exit(ap);
         }
 
-        private async Task SendStationToClient(AirplaneModel ap)
+        private async Task SendJoinStationToClient(AirplaneModel ap)
         {
             if (HubContext != null)
                 await HubContext.Clients.All.SendAsync("onAirplaneJoin",
                     new StationModel { AirplaneInIt = ap, StationID = this.StationID });
         }
 
-        async Task Entery(AirplaneModel ap)
+        private async Task SendExitStationToClient(AirplaneModel ap)
         {
-            AirplaneInIt = ap;
+            if (HubContext != null)
+                await HubContext.Clients.All.SendAsync("onAirplaneJoin",
+                    new StationModel { AirplaneInIt = null, StationID = this.StationID });
+        }
+        public async Task Entery(AirplaneModel ap, int seconds = 5)
+        {
             await emergencyGate.WaitAsync();
             await gate.WaitAsync();
+            await SendJoinStationToClient(ap);
+            AirplaneInIt = ap;
+            Console.WriteLine(ap.Id + " entered station number " + StationID);
+            seconds = seconds * 100 / speedPrecent;
+            Thread.Sleep(seconds * 1000);
         }
         bool CheckCrush(AirplaneModel ap)
         {
@@ -71,11 +76,13 @@ namespace Airport.BL.StationControl
             }
             return false;
         }
-        void Exit()
+        public async Task Exit(AirplaneModel ap)
         {
             AirplaneInIt = null;
+            Console.WriteLine(ap.Id + " Exited station number " + StationID);
             gate.Release();
             emergencyGate.Release();
+            await SendExitStationToClient(ap);
         }
     }
 }

@@ -13,7 +13,10 @@ namespace Airport.Services
             InitizPlanes();
             _backgroundTimer = timerService;
         }
-
+        public List<AirplaneModel> PlanesOnPath { get; private set; }
+          = new List<AirplaneModel>();
+        public List<AirplaneModel> PlanesParking { get; private set; }
+          = new List<AirplaneModel>();
         public List<AirplaneModel> Airplanes { get; set; } = new List<AirplaneModel>();
         public List<StationModel> Stations { get; set; } = new List<StationModel>();
         public void InitizPlanes()
@@ -29,15 +32,26 @@ namespace Airport.Services
                 new AirplaneModel() { Id = 7 ,SecondsToArrive = 0}
             };
             Airplanes.ForEach(airP => Console.WriteLine("plane id:" + airP.Id + " time: " + airP.SecondsToArrive));
-        }
-        public void SortAirplanes(List<AirplaneModel> listOnPath, Action<AirplaneModel> action)
-        {
-            _backgroundTimer.Start(() =>
+
+            PlanesParking = new List<AirplaneModel>()
             {
-                if (listOnPath.Count != 0)
+                new AirplaneModel() { Id = 8 ,SecondsToArrive = null },
+                new AirplaneModel() { Id = 9 ,SecondsToArrive = null },
+                new AirplaneModel() { Id = 10 ,SecondsToArrive = null },
+                new AirplaneModel() { Id = 11 ,SecondsToArrive = null },
+                new AirplaneModel() { Id = 12 ,SecondsToArrive = null },
+                new AirplaneModel() { Id = 13 ,SecondsToArrive = null },
+                new AirplaneModel() { Id = 14 ,SecondsToArrive = null }
+            };
+        }
+        public async Task QueueAirplanes(List<AirplaneModel> list, Action<AirplaneModel> action)
+        {
+            await _backgroundTimer.Start(() =>
+            {
+                if (list.Count != 0)
                 {
-                    var plane = listOnPath[0];
-                    listOnPath.RemoveAt(0);
+                    var plane = list[0];
+                    list.RemoveAt(0);
                     Thread thread = new Thread(new ThreadStart(() =>
                     {
                         action.Invoke(plane);
@@ -46,11 +60,7 @@ namespace Airport.Services
                 }
             });
         }
-        public void SendStation(Station ap)
-        {
-            Stations.Add(ap);
-        }
-
+        public void SendStation(Station ap) => Stations.Add(ap);
     }
 }
 

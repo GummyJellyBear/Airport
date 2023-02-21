@@ -14,6 +14,7 @@ namespace Airport.BL
         private readonly ITimerService _backgroundTimer;
         private readonly ITimerService _backgroundRender;
         private readonly IAirControl _airControl;
+        private readonly IGroundControl _groundControl;
         private readonly IHubContext<MyHub> _hub;
 
         public TowerControl(
@@ -22,6 +23,7 @@ namespace Airport.BL
             ITimerService background,
             ITimerService backgroundRender,
             IAirControl airControl,
+            IGroundControl groungControl,
             IHubContext<MyHub> hub)
         {
             _airplaneService = airplaneService;
@@ -29,6 +31,7 @@ namespace Airport.BL
             _backgroundTimer = background;
             _backgroundRender = backgroundRender;
             _airControl = airControl;
+            _groundControl = groungControl;
             _hub = hub;
         }
         public void StartSimulator()
@@ -36,8 +39,9 @@ namespace Airport.BL
             InitiazlizeStations();
             InitiazAirMovment();
             InitiazlizePlanes();
-            var listOnPath = _pathControl.PlanesOnPath;
-            _airplaneService.SortAirplanes(listOnPath, (plane) =>
+            var listOnPathFromAir = _airplaneService.PlanesOnPath;
+
+            _airplaneService.QueueAirplanes(listOnPathFromAir, (plane) =>
                 _pathControl.LandToTakeoff(plane));
         }
         public void RenderAirplanes()
@@ -56,7 +60,7 @@ namespace Airport.BL
         public void DoEmergency(int stationNumber, int SOSSeconds) =>
             _pathControl.DoEmergency(stationNumber, SOSSeconds);
         void InitiazlizeStations() => _pathControl.InitiazlizeStations(_hub);
-        void InitiazAirMovment() => _airControl.FlyTimer(_pathControl.PlanesOnPath);
+        void InitiazAirMovment() => _airControl.FlyTimer(_airplaneService.PlanesOnPath);
         void InitiazlizePlanes() => _airControl.PlanesToLand = _airplaneService.Airplanes;
     }
 }

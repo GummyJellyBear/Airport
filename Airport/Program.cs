@@ -27,6 +27,7 @@ builder.Services.AddSignalR();
 builder.Services.AddTransient<ITimerService, TimerService>();
 builder.Services.AddSingleton<IAirplaneService,AirplaneService>();
 builder.Services.AddSingleton<IAirControl, AirControl>();
+builder.Services.AddSingleton<IGroundControl, GroundControl>();
 builder.Services.AddSingleton<IPathControl, PathControl>();
 builder.Services.AddTransient<IStation, Station>();
 builder.Services.AddSingleton<ITowerControl, TowerControl>();
